@@ -65,19 +65,93 @@ from datetime import timedelta
 
 #Step Five
 resp = requests.post('http://challenge.code2040.org/api/dating', json={'token': 'b445cce28b1d51745774db40e999c4ea'})
-print resp.content
+date = resp.content
+jsonDate = json.loads(date)
 
-def convertToDates(numSeconds):
-    months = numSeconds / (7*24*60*60)
-    weeks = numSeconds / (7*24*60*60)
-    days = numSeconds / (24*60*60) - 7*weeks
-    hours = numSeconds / (60*60) - 7*24*weeks - 24*days
-    minutes = numSeconds / 60 - 7*24*60*weeks - 24*60*days - 60*hours
-    seconds = numSeconds - 7*24*60*60*weeks - 24*60*60*days - 60*60*hours - 60*minutes
-    print("Number of weeks: " + str(weeks))
-    print("Number of days: " + str(days))
-    print("Number of hours: " + str(hours))
-    print("Number of minutes: " + str(minutes))
-    print("Number of seconds: " + str(seconds))
+print(date)
 
-convertToDates(82070)
+weeks = 0
+days = 0
+hours = 0
+minutes = 0
+seconds = 0
+
+interval = int(jsonDate["interval"])
+
+weeks = interval / (7*24*60*60)
+days = interval / (24*60*60) - 7*weeks
+hours = interval / (60*60) - 7*24*weeks - 24*days
+minutes = interval / 60 - 7*24*60*weeks - 24*60*days - 60*hours
+seconds = interval - 7*24*60*60*weeks - 24*60*60*days - 60*60*hours - 60*minutes
+
+print("number of days to change: " +str(days))
+print("number of hours to change: " +str(hours))
+print("number of min to change: " +str(minutes))
+print("number of seconds to change: " +str(seconds))
+
+currDay = int(date[22:24])
+print("current day number: " +str(currDay))
+
+currHour = int(date[25:27])
+print("current hour number: " +str(currHour))
+
+currMin = int(date[28:30])
+print("current min numbers " +str(currMin))
+
+currSec = int(date[31:33])
+print("current sec number " +str(currSec))
+
+
+if days != 0:
+    currDay = currDay + days
+
+if hours != 0:
+    currHour = currHour + hours
+    if currHour >= 24:
+        currDay = currDay + 1
+        currHour = currHour - 24
+
+if minutes != 0:
+    currMin = currMin + minutes
+    if currMin >= 60:
+            currHour = currHour + 1
+            currMin = currMin - 60
+
+if seconds != 0:
+    currSec = currSec + seconds
+    if currSec >= 60:
+            currMin = currMin + 1
+            currSec = currSec - 60
+
+if currDay < 10:
+    currDay = "0" +str(currDay)
+else:
+    currDay = str(currDay)
+
+if currHour < 10:
+    currHour = "0" +str(currHour)
+else:
+    currHour = str(currHour)
+
+if currMin < 10:
+    currMin = "0" +str(currMin)
+else:
+    currMin = str(currMin)
+
+if currSec < 10:
+    currSec = "0" +str(currSec)
+else:
+    currSec = str(currSec)
+
+print("new day number: " +currDay)
+print("new hour number: " +currHour)
+print("new min number: " +currMin)
+print("new sec number: " +currSec)
+
+#{"datestamp":"2016-11-04T18:18:59Z","interval":67335}
+newDate = date[:22] + str(currDay) + "T" + str(currHour) + ":" + str(currHour) + ":" + str(currSec) + date[33:]
+newDate = newDate[14:34]
+print date[14:34]
+print newDate
+
+resp = requests.post('http://challenge.code2040.org/api/dating/validate', json={'token': 'b445cce28b1d51745774db40e999c4ea', 'datestamp': newDate})
